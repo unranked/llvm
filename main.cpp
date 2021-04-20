@@ -48,7 +48,7 @@ llvm::Function* createMulFunction(llvm::Module* module) {
     builder.CreateStore(builder.getInt32(0), ResultVal);
     llvm::Instruction* br = builder.CreateBr(loop);
     builder.SetInsertPoint(loop);
-    llvm::Value *StartVal = llvm::ConstantInt::get(builder.getInt32Ty(), 1);
+    llvm::Value *StartVal = llvm::ConstantInt::get(builder.getInt32Ty(), 0);
     llvm::Value *StepVal = llvm::ConstantInt::get(builder.getInt32Ty(), 1);
     llvm::PHINode *Variable = builder.CreatePHI(llvm::Type::getInt32Ty(context), 0, "i");
     Variable->addIncoming(StartVal, entry);
