@@ -34,7 +34,7 @@ llvm::Function* createSumFunction(llvm::Module* module) {
     */
     llvm::LLVMContext &context = module->getContext();
     llvm::IRBuilder<> builder(context);
-    std::vector<llvm::Type*> ArgTypes = {builder.getIntPtrTy(module->getDataLayout()), builder.getInt32Ty()};
+    std::vector<llvm::Type*> ArgTypes = {builder.getInt32Ty()->getPointerTo(0), builder.getInt32Ty()};
     auto *funcType = llvm::FunctionType::get(builder.getInt32Ty(), ArgTypes, false);
     auto *fooFunc = llvm::Function::Create(
         funcType, llvm::Function::ExternalLinkage, "sum", module
@@ -48,8 +48,8 @@ llvm::Function* createSumFunction(llvm::Module* module) {
     auto *l11 = llvm::BasicBlock::Create(context, "", fooFunc);
     auto *l19 = llvm::BasicBlock::Create(context, "", fooFunc);
     auto *l22 = llvm::BasicBlock::Create(context, "", fooFunc);
-    builder.SetInsertPoint(l2);s
-    llvm::Value *p3 = builder.CreateAlloca(builder.getIntPtrTy(module->getDataLayout()), 0, nullptr, "");
+    builder.SetInsertPoint(l2);
+    llvm::Value *p3 = builder.CreateAlloca(builder.getInt32Ty()->getPointerTo(0), 0, nullptr, "");
     llvm::Value *p4 = builder.CreateAlloca(builder.getInt32Ty(), 0, nullptr, "");
     llvm::Value *p5 = builder.CreateAlloca(builder.getInt32Ty(), 0, nullptr, "");
     llvm::Value *p6 = builder.CreateAlloca(builder.getInt32Ty(), 0, nullptr, "");
@@ -64,31 +64,23 @@ llvm::Function* createSumFunction(llvm::Module* module) {
     llvm::Value *p10 = builder.CreateICmpSLT(p8, p9);
     builder.CreateCondBr(p10, l11, l22);
     builder.SetInsertPoint(l11);
-    /*
-                   ; preds = %7
-  %12 = load i32*, i32** %3, align 8
-  %13 = load i32, i32* %6, align 4
-  %14 = sext i32 %13 to i64
-  %15 = getelementptr inbounds i32, i32* %12, i64 %14
-  %16 = load i32, i32* %15, align 4
-  %17 = load i32, i32* %5, align 4
-  %18 = add nsw i32 %17, %16
-  store i32 %18, i32* %5, align 4
-  br label %19
-  */
-
     llvm::Value *p12 = builder.CreateLoad(p3);
     llvm::Value *p13 = builder.CreateLoad(p6);
-    llvm::Value *p14 = builder.CreateSExt(p13, builder.getIntPtrTy(module->getDataLayout()));
+    llvm::Value *p14 = builder.CreateSExt(p13, builder.getInt64Ty());
     llvm::Value *p15 = builder.CreateInBoundsGEP(p12, p14);
-
-
-
-
+    llvm::Value *p16 = builder.CreateLoad(p15);
+    llvm::Value *p17 = builder.CreateLoad(p5);
+    llvm::Value *p18 = builder.CreateAdd(p17, p16);
+    builder.CreateStore(p18, p5);
     builder.CreateBr(l19);
     builder.SetInsertPoint(l19);
+    llvm::Value *p20 = builder.CreateLoad(p6);
+    llvm::Value *p21 = builder.CreateAdd(p20, llvm::ConstantInt::get(builder.getInt32Ty(), 1));
+    builder.CreateStore(p21, p6);
+    builder.CreateBr(l7);
     builder.SetInsertPoint(l22);
-    builder.CreateRet(p3);
+    llvm::Value *p23 = builder.CreateLoad(p5);
+    builder.CreateRet(p23);
     llvm::verifyFunction(*fooFunc);
     return fooFunc;
 };
@@ -125,7 +117,9 @@ int main(int argc, char* argv[]) {
     int arg1[5] = {1, 2, 3, 4, 5};
     int arg2 = 5;
     int result = func_ptr(arg1, arg2);
-    std::cout << "res = " << result << std::endl;
-
+    for (int i = 0; i < arg2 - 1; ++i) {
+        std::cout << arg1[i] << " + ";
+    }
+    std::cout << arg1[arg2 - 1] << " = " << result << std::endl;
     return 0;
 }

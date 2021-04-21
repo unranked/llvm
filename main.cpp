@@ -31,7 +31,7 @@ llvm::Function* createMulFunction(llvm::Module* module) {
     }
 
     compile with:
-    # clang++-8 `llvm-config-8 --cxxflags --ldflags --libs` -std=c++17 array.cpp -o exec.out
+    # clang++-8 `llvm-config-8 --cxxflags --ldflags --libs` -std=c++17 main.cpp -o exec.out
     */
     llvm::LLVMContext &context = module->getContext();
     llvm::IRBuilder<> builder(context);
