@@ -28,6 +28,9 @@ llvm::Function* createSumFunction(llvm::Module* module) {
         }
         return result;
     }
+
+    compile with:
+    # clang++-8 `llvm-config-8 --cxxflags --ldflags --libs` -std=c++17 array.cpp -o exec.out
     */
     llvm::LLVMContext &context = module->getContext();
     llvm::IRBuilder<> builder(context);
@@ -45,7 +48,7 @@ llvm::Function* createSumFunction(llvm::Module* module) {
     auto *l11 = llvm::BasicBlock::Create(context, "", fooFunc);
     auto *l19 = llvm::BasicBlock::Create(context, "", fooFunc);
     auto *l22 = llvm::BasicBlock::Create(context, "", fooFunc);
-    builder.SetInsertPoint(l2);
+    builder.SetInsertPoint(l2);s
     llvm::Value *p3 = builder.CreateAlloca(builder.getIntPtrTy(module->getDataLayout()), 0, nullptr, "");
     llvm::Value *p4 = builder.CreateAlloca(builder.getInt32Ty(), 0, nullptr, "");
     llvm::Value *p5 = builder.CreateAlloca(builder.getInt32Ty(), 0, nullptr, "");
