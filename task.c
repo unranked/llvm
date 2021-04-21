@@ -2,8 +2,8 @@
 #define VECTYPE int // double
 
 typedef struct {
-    VECTYPE values[VECSIZE];
-    _Bool null[VECSIZE];
+    VECTYPE* values;
+    char* null;
 } Vector;
 
 void addv(Vector *vec1, Vector *vec2, Vector *result) {
