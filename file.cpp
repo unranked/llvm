@@ -156,7 +156,7 @@ llvm::Function* createAddvFunction(llvm::Module* module) {
     builder.CreateStore(inc, iptr);
     builder.CreateBr(loop_check);
     builder.SetInsertPoint(afterloop);
-    builder.CreateRet(llvm::UndefValue::get(llvm::Type::getVoidTy(context)));
+    builder.CreateRetVoid();
     llvm::verifyFunction(*fooFunc);
     return fooFunc;
 };
