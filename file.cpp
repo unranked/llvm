@@ -22,7 +22,7 @@
 #include "llvm/Analysis/BasicAliasAnalysis.h"
 
 #define VECSIZE 50
-#define VECTYPE double
+#define VECTYPE double // int
 
 typedef struct {
     VECTYPE* values;
