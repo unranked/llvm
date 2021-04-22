@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <type_traits>
 
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
@@ -21,7 +22,7 @@
 #include "llvm/Analysis/BasicAliasAnalysis.h"
 
 #define VECSIZE 50
-#define VECTYPE int // double
+#define VECTYPE double
 
 typedef struct {
     VECTYPE* values;
@@ -48,7 +49,12 @@ llvm::Function* createAddvFunction(llvm::Module* module) {
     */
     llvm::LLVMContext &context = module->getContext();
     llvm::IRBuilder<> builder(context);
-    llvm::Type *struct_values = llvm::PointerType::get(builder.getInt32Ty(), 0);
+    llvm::Type *struct_values = nullptr;
+    if constexpr (std::is_same_v<VECTYPE, int>) {
+        struct_values = llvm::PointerType::get(builder.getInt32Ty(), 0);
+    } else if constexpr (std::is_same_v<VECTYPE, double>) {
+        struct_values = llvm::PointerType::get(builder.getDoubleTy(), 0);
+    }
     llvm::Type *struct_null = llvm::PointerType::get(builder.getInt8Ty(), 0);
     llvm::StructType *struct_Ty = llvm::StructType::create(context, "Vector");
     struct_Ty->setBody({struct_values, struct_null});
@@ -134,7 +140,12 @@ llvm::Function* createAddvFunction(llvm::Module* module) {
         });
     auto *result_values = builder.CreateLoad(result_values_ptr);
     auto *result_values_i_ptr = builder.CreateInBoundsGEP(result_values, i);
-    auto *sum = builder.CreateAdd(arg1_values_i, arg2_values_i, "sum");
+    llvm::Value *sum = nullptr;
+    if constexpr (std::is_same_v<VECTYPE, int>) {
+        sum = builder.CreateAdd(arg1_values_i, arg2_values_i, "sum");
+    } else if constexpr (std::is_same_v<VECTYPE, double>) {
+        sum = builder.CreateFAdd(arg1_values_i, arg2_values_i, "sum");
+    }
     builder.CreateStore(sum, result_values_i_ptr);
     builder.CreateBr(increment);
     builder.SetInsertPoint(else_label);
@@ -185,7 +196,7 @@ int main(int argc, char* argv[]) {
     std::srand(123);
     for (int i = 0; i < VECSIZE; ++i) {
         arg1.values[i] = std::rand() % 100;
-        arg2.values[i] = std::rand() % 100;
+        arg2.values[i] = std::rand() % 100 + 0.5;
         arg1.null[i] = std::rand() % 2 ? 1 : 0;
         arg2.null[i] = std::rand() % 2 ? 1 : 0;
     }
